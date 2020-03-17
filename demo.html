@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <title>Backyard</title>
+        <style>
+            body { margin: 0; }
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+    <body>
+        <script src="js/three.js"></script>
+        <script>
+            // scene size
+			var WIDTH = window.innerWidth;
+            var HEIGHT = window.innerHeight;
+            
+            // camera
+			var VIEW_ANGLE = 75;
+			var ASPECT = WIDTH / HEIGHT;
+			var NEAR = 1;
+			var FAR = 1000;
+            var camera, scene, renderer;
+
+            var textureUrls = {
+                wood1: 'textures/compressed-but-large-wood-texture.jpg',
+                wood2: 'textures/wood-fence.png'
+            }
+            initTextures(textureUrls, function(err, textures) {
+                if (err) { console.log(err); }
+                init(textures);
+            });
+
+            function initTextures(urls, callback) {
+                var textures = {}
+                var onLoad = function() {
+                    callback(null, textures);
+                };
+
+                var onProgress = function() {}
+                var onError = function(url) {
+                    callback(new Error('cannot open ' + url));
+                }
+
+                var manager = new THREE.LoadingManager(onLoad, onProgress, onError);
+                var loader = new THREE.TextureLoader(manager);
+                Object.entries(urls).forEach((key, url) => {
+                    textures[key[0]] = loader.load(key[1])
+                });
+            }
+
+            function init(remoteTextures) {
+                camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+				camera.position.set(0, 75, 160);
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xcccccc );
+
+                grass();
+                walls(remoteTextures);
+
+                scene.children.reverse();
+
+                renderer = new THREE.WebGLRenderer();
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                document.body.appendChild( renderer.domElement );
+
+                window.addEventListener( 'resize', onWindowResize, false );
+                render();
+            }
+
+            function grass() {
+                var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
+
+				var texture = new THREE.CanvasTexture( generateTexture() );
+
+				for ( var i = 0; i < 15; i ++ ) {
+					var material = new THREE.MeshBasicMaterial( {
+						color: new THREE.Color().setHSL( 0.3, 0.75, ( i / 15 ) * 0.4 + 0.1 ),
+						map: texture,
+						depthTest: false,
+						depthWrite: false,
+						transparent: true
+					} );
+
+					var mesh = new THREE.Mesh( geometry, material );
+
+					mesh.position.y = i * 0.25;
+                    mesh.rotation.x = - Math.PI / 2;
+					scene.add( mesh );
+                }
+            }
+
+            function walls(remoteTextures) {
+                var wallGeometry = new THREE.PlaneBufferGeometry( 100, 50 );
+
+                var material = new THREE.MeshBasicMaterial( {
+                    map: remoteTextures['wood1']
+                } );
+
+                var meshWall = new THREE.Mesh( wallGeometry, material );
+                meshWall.position.z = 50;
+                meshWall.position.y = 25;
+                meshWall.rotation.x = Math.PI;
+
+                scene.add(meshWall);
+            }
+
+            function generateTexture() {
+                var canvas = document.createElement( 'canvas' );
+				canvas.width = 512;
+				canvas.height = 512;
+
+				var context = canvas.getContext( '2d' );
+
+				for ( var i = 0; i < 20000; i ++ ) {
+
+					context.fillStyle = 'hsl(0,0%,' + ( Math.random() * 50 + 50 ) + '%)';
+					context.beginPath();
+					context.arc( Math.random() * canvas.width, Math.random() * canvas.height, Math.random() + 0.15, 0, Math.PI * 2, true );
+					context.fill();
+
+				}
+
+				context.globalAlpha = 0.075;
+				context.globalCompositeOperation = 'lighter';
+
+				return canvas;
+            }
+
+            function render() {
+                // Rotating maquette
+                var time = 264067995.436; Date.now() / 6000;
+                console.log(time);
+
+                camera.position.x = 80 * Math.cos( time );
+                camera.position.z = 80 * Math.sin( time );
+
+                camera.lookAt( scene.position );
+
+                // for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+
+                //     var mesh = scene.children[ i ];
+                //     mesh.position.x = Math.sin( time * 4 ) * i * i * 0.005;
+                //     mesh.position.z = Math.cos( time * 6 ) * i * i * 0.005;
+
+                // }
+
+                renderer.render( scene, camera );
+            }
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize( window.innerWidth, window.innerHeight );
+            }
+            
+        </script>
+    </body>
+</html>
