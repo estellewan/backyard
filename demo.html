@@ -24,7 +24,8 @@
 
             var textureUrls = {
                 wood1: 'textures/compressed-but-large-wood-texture.jpg',
-                wood2: 'textures/wood-fence.png'
+                wood2: 'textures/wood_painted_173_207_Small.jpg',
+                wood3: 'textures/wood_painted_165_198_Small.jpg',
             }
             initTextures(textureUrls, function(err, textures) {
                 if (err) { console.log(err); }
@@ -75,7 +76,7 @@
 
                 var texture = new THREE.CanvasTexture( generateTexture() );
 
-                for ( var i = 0; i < 15; i ++ ) {
+                for ( var i = 0; i < 10; i ++ ) {
                     var material = new THREE.MeshBasicMaterial( {
                         color: new THREE.Color().setHSL( 0.3, 0.75, ( i / 15 ) * 0.4 + 0.1 ),
                         map: texture,
@@ -93,18 +94,40 @@
             }
 
             function walls(remoteTextures) {
-                var wallGeometry = new THREE.PlaneBufferGeometry( 100, 50 );
+                var wallGeometry = new THREE.PlaneBufferGeometry( 100, 40 );
 
                 var material = new THREE.MeshBasicMaterial( {
-                    map: remoteTextures['wood1']
+                    map: remoteTextures['wood2']
                 } );
 
-                var meshWall = new THREE.Mesh( wallGeometry, material );
-                meshWall.position.z = 50;
-                meshWall.position.y = 25;
-                meshWall.rotation.x = Math.PI;
+                var rightWall = new THREE.Mesh( wallGeometry, material );
+                rightWall.position.z = 50;
+                rightWall.position.y = 20;
+                rightWall.rotation.x = Math.PI;
 
-                scene.add(meshWall);
+                var leftWallGeometry = new THREE.PlaneBufferGeometry( 100, 40 );
+                var material = new THREE.MeshBasicMaterial( {
+                    map: remoteTextures['wood2']
+                } );
+                var leftWall = new THREE.Mesh( leftWallGeometry, material );
+                leftWall.position.z = -50;
+                leftWall.position.y = 20;
+                leftWall.position.x = 0;
+                leftWall.rotation.y = Math.PI / 720;
+
+                var backWallGeometry = new THREE.PlaneBufferGeometry( 100, 40 );
+                var material = new THREE.MeshBasicMaterial( {
+                    map: remoteTextures['wood3']
+                } );
+                var backWall = new THREE.Mesh( backWallGeometry, material );
+                backWall.position.z = 0;
+                backWall.position.y = 20;
+                backWall.position.x = -50;
+                backWall.rotation.y = Math.PI / 2;
+
+                scene.add(backWall);
+                scene.add(rightWall);
+                scene.add(leftWall);
             }
 
             function generateTexture() {
@@ -114,7 +137,7 @@
 
                 var context = canvas.getContext( '2d' );
 
-                for ( var i = 0; i < 20000; i ++ ) {
+                for ( var i = 0; i < 40000; i ++ ) {
 
                     context.fillStyle = 'hsl(0,0%,' + ( Math.random() * 50 + 50 ) + '%)';
                     context.beginPath();
@@ -131,11 +154,11 @@
 
             function render() {
                 // Rotating maquette
-                var time = 264067995.436; Date.now() / 6000;
+                var time = Date.now() / 6000;
                 console.log(time);
 
-                camera.position.x = 80 * Math.cos( time );
-                camera.position.z = 80 * Math.sin( time );
+                camera.position.x = 80 * Math.cos( 0.5 );
+                camera.position.z = 80 * Math.sin( 0.5 );
 
                 camera.lookAt( scene.position );
 
