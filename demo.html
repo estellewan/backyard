@@ -26,6 +26,9 @@
                 wood1: 'textures/compressed-but-large-wood-texture.jpg',
                 wood2: 'textures/wood_painted_173_207_Small.jpg',
                 wood3: 'textures/wood_painted_165_198_Small.jpg',
+                paver1: 'textures/grey-tiles-paver.jpg',
+                paver2: 'textures/concrete-paver.jpg',
+                pebbles1: 'textures/pebbles.jpg'
             }
             initTextures(textureUrls, function(err, textures) {
                 if (err) { console.log(err); }
@@ -57,10 +60,12 @@
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color( 0xcccccc );
 
+                
                 grass();
+                pavers(remoteTextures);
                 walls(remoteTextures);
 
-                scene.children.reverse();
+                // scene.children.reverse();
 
                 renderer = new THREE.WebGLRenderer();
                 renderer.setPixelRatio( window.devicePixelRatio );
@@ -71,16 +76,41 @@
                 render();
             }
 
+            function pavers(remoteTextures) {
+                var geometry = new THREE.BoxBufferGeometry( 5, 5, 1.5 );
+                var material = new THREE.MeshBasicMaterial({
+                    map: remoteTextures['paver1']
+                });
+
+                for (var i = 0; i < 8; i++) {
+                    for (var j = 0; j < 8; j++) {
+                        var mesh = new THREE.Mesh( geometry, material );
+
+                        mesh.rotation.x = - Math.PI / 2;
+                        mesh.position.z = -10 + (5.5 * j);
+                        mesh.position.x = 5 + (5.5 * i);
+                        mesh.position.y = 10;
+                        scene.add( mesh );
+                    }
+                }
+            }
+
             function grass() {
                 var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
+
+                // add background - to fix
+                var backgroundMaterial = new THREE.MeshBasicMaterial( { color: new THREE.Color( 0x407933 ) } );
+                var backgroundMesh = new THREE.Mesh( geometry, backgroundMaterial );
+                backgroundMesh.rotation.x = - Math.PI / 2;
+                scene.add( backgroundMesh );
 
                 var texture = new THREE.CanvasTexture( generateTexture() );
 
                 for ( var i = 0; i < 10; i ++ ) {
                     var material = new THREE.MeshBasicMaterial( {
-                        color: new THREE.Color().setHSL( 0.3, 0.75, ( i / 15 ) * 0.4 + 0.1 ),
+                        color: new THREE.Color().setHSL( 0.25, 0.75, ( i / 15 ) * 0.4 + 0.1 ),
                         map: texture,
-                        depthTest: false,
+                        // depthTest: false,
                         depthWrite: false,
                         transparent: true
                     } );
@@ -146,7 +176,7 @@
 
                 }
 
-                context.globalAlpha = 0.075;
+                context.globalAlpha = 0.095;
                 context.globalCompositeOperation = 'lighter';
 
                 return canvas;
