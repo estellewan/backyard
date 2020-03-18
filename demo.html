@@ -10,7 +10,11 @@
     </head>
     <body>
         <script src="js/three.js"></script>
-        <script>
+        <script type="module">
+            import grass from './js/mesh/grass.js';
+            import walls from './js/mesh/walls.js';
+            import pavers from './js/mesh/pavers.js';
+            import pebbles from './js/mesh/pebbles.js';
             // scene size
             var WIDTH = window.innerWidth;
             var HEIGHT = window.innerHeight;
@@ -28,7 +32,8 @@
                 wood3: 'textures/wood_painted_165_198_Small.jpg',
                 paver1: 'textures/grey-tiles-paver.jpg',
                 paver2: 'textures/concrete-paver.jpg',
-                pebbles1: 'textures/pebbles.jpg'
+                pebbles1: 'textures/pebbles.jpg',
+                gravel1: 'textures/gravel1.png'
             }
             initTextures(textureUrls, function(err, textures) {
                 if (err) { console.log(err); }
@@ -61,9 +66,10 @@
                 scene.background = new THREE.Color( 0xcccccc );
 
                 
-                grass();
-                pavers(remoteTextures);
-                walls(remoteTextures);
+                grass(scene);
+                pebbles(scene, remoteTextures);
+                pavers(scene, remoteTextures);
+                walls(scene, remoteTextures);
 
                 // scene.children.reverse();
 
@@ -76,119 +82,13 @@
                 render();
             }
 
-            function pavers(remoteTextures) {
-                var geometry = new THREE.BoxBufferGeometry( 5, 5, 1.5 );
-                var material = new THREE.MeshBasicMaterial({
-                    map: remoteTextures['paver1']
-                });
-
-                for (var i = 0; i < 8; i++) {
-                    for (var j = 0; j < 8; j++) {
-                        var mesh = new THREE.Mesh( geometry, material );
-
-                        mesh.rotation.x = - Math.PI / 2;
-                        mesh.position.z = -10 + (5.5 * j);
-                        mesh.position.x = 5 + (5.5 * i);
-                        mesh.position.y = 10;
-                        scene.add( mesh );
-                    }
-                }
-            }
-
-            function grass() {
-                var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
-
-                // add background - to fix
-                var backgroundMaterial = new THREE.MeshBasicMaterial( { color: new THREE.Color( 0x407933 ) } );
-                var backgroundMesh = new THREE.Mesh( geometry, backgroundMaterial );
-                backgroundMesh.rotation.x = - Math.PI / 2;
-                scene.add( backgroundMesh );
-
-                var texture = new THREE.CanvasTexture( generateTexture() );
-
-                for ( var i = 0; i < 10; i ++ ) {
-                    var material = new THREE.MeshBasicMaterial( {
-                        color: new THREE.Color().setHSL( 0.25, 0.75, ( i / 15 ) * 0.4 + 0.1 ),
-                        map: texture,
-                        // depthTest: false,
-                        depthWrite: false,
-                        transparent: true
-                    } );
-
-                    var mesh = new THREE.Mesh( geometry, material );
-
-                    mesh.position.y = i * 0.25;
-                    mesh.rotation.x = - Math.PI / 2;
-                    scene.add( mesh );
-                }
-            }
-
-            function walls(remoteTextures) {
-                var wallGeometry = new THREE.PlaneBufferGeometry( 100, 40 );
-
-                var material = new THREE.MeshBasicMaterial( {
-                    map: remoteTextures['wood2']
-                } );
-
-                var rightWall = new THREE.Mesh( wallGeometry, material );
-                rightWall.position.z = 50;
-                rightWall.position.y = 20;
-                rightWall.rotation.x = Math.PI;
-
-                var leftWallGeometry = new THREE.PlaneBufferGeometry( 100, 40 );
-                var material = new THREE.MeshBasicMaterial( {
-                    map: remoteTextures['wood2']
-                } );
-                var leftWall = new THREE.Mesh( leftWallGeometry, material );
-                leftWall.position.z = -50;
-                leftWall.position.y = 20;
-                leftWall.position.x = 0;
-                leftWall.rotation.y = Math.PI / 720;
-
-                var backWallGeometry = new THREE.PlaneBufferGeometry( 100, 40 );
-                var material = new THREE.MeshBasicMaterial( {
-                    map: remoteTextures['wood3']
-                } );
-                var backWall = new THREE.Mesh( backWallGeometry, material );
-                backWall.position.z = 0;
-                backWall.position.y = 20;
-                backWall.position.x = -50;
-                backWall.rotation.y = Math.PI / 2;
-
-                scene.add(backWall);
-                scene.add(rightWall);
-                scene.add(leftWall);
-            }
-
-            function generateTexture() {
-                var canvas = document.createElement( 'canvas' );
-                canvas.width = 512;
-                canvas.height = 512;
-
-                var context = canvas.getContext( '2d' );
-
-                for ( var i = 0; i < 40000; i ++ ) {
-
-                    context.fillStyle = 'hsl(0,0%,' + ( Math.random() * 50 + 50 ) + '%)';
-                    context.beginPath();
-                    context.arc( Math.random() * canvas.width, Math.random() * canvas.height, Math.random() + 0.15, 0, Math.PI * 2, true );
-                    context.fill();
-
-                }
-
-                context.globalAlpha = 0.095;
-                context.globalCompositeOperation = 'lighter';
-
-                return canvas;
-            }
-
             function render() {
                 // Rotating maquette
                 var time = Date.now() / 6000;
                 console.log(time);
 
-                camera.position.x = 80 * Math.cos( 0.5 );
-                camera.position.z = 80 * Math.sin( 0.5 );
+                camera.position.x = 80 * Math.cos( 0 );
+                camera.position.z = 80 * Math.sin( 0 );
 
                 camera.lookAt( scene.position );
 
@@ -209,7 +109,6 @@
 
                 renderer.setSize( window.innerWidth, window.innerHeight );
             }
-            
         </script>
     </body>
 </html>
