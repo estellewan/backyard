@@ -15,6 +15,7 @@
             import walls from './js/mesh/walls.js';
             import pavers from './js/mesh/pavers.js';
             import pebbles from './js/mesh/pebbles.js';
+            import spheres from './js/mesh/spheres.js';
             // scene size
             var WIDTH = window.innerWidth;
             var HEIGHT = window.innerHeight;
@@ -65,11 +66,14 @@
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color( 0xcccccc );
 
+                // Lights
+                initLights(scene);
                 
                 grass(scene);
-                pebbles(scene, remoteTextures);
+                // pebbles(scene, remoteTextures);
                 pavers(scene, remoteTextures);
                 walls(scene, remoteTextures);
+                spheres(scene);
 
                 // scene.children.reverse();
 
@@ -82,13 +86,29 @@
                 render();
             }
 
+            function initLights(scene) {
+                var spotLight = new THREE.SpotLight( 0xffffff );
+                spotLight.position.set( 100, 1000, 100 );
+
+                spotLight.castShadow = true;
+
+                spotLight.shadow.mapSize.width = 1024;
+                spotLight.shadow.mapSize.height = 1024;
+
+                spotLight.shadow.camera.near = 500;
+                spotLight.shadow.camera.far = 4000;
+                spotLight.shadow.camera.fov = 30;
+
+                scene.add( spotLight );
+            }
+
             function render() {
                 // Rotating maquette
                 var time = Date.now() / 6000;
                 console.log(time);
 
-                camera.position.x = 80 * Math.cos( 0 );
-                camera.position.z = 80 * Math.sin( 0 );
+                camera.position.x = 80 * Math.cos( 0.5 );
+                camera.position.z = 80 * Math.sin( 0.5 );
 
                 camera.lookAt( scene.position );
 
